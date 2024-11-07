@@ -1,0 +1,16 @@
+# Virtuell miljö
+venv/
+
+# Python cache-filer
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# VS Code-inställningar
+.vscode/
+
+# Loggfiler
+*.log
+
+# Systemfiler
+.DS_Store
