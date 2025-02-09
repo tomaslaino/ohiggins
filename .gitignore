@@ -1,16 +1,9 @@
-# Virtuell miljö
+# Virtuellt miljö
 venv/
 
-# Python cache-filer
+# Python cache
 __pycache__/
-*.py[cod]
-*.sqlite3
+*.pyc
 
-# VS Code-inställningar
+# VSC inställningar
 .vscode/
-
-# Loggfiler
-*.log
-
-# Systemfiler
-.DS_Store

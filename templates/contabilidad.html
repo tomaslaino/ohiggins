@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <div class="card mb-4">
+    <div class="card-header bg-success text-white">
+      <h4 class="mb-0 text-center">Contabilidad</h4>
+    </div>
+    <div class="card-body">
+      <!-- Filtreringspanel -->
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <form method="get" action="{{ url_for('contabilidad') }}" class="form-inline justify-content-center">
+            <!-- Datum -->
+            <label class="mr-2" for="fecha_from">Desde:</label>
+            <input type="datetime-local" class="form-control mr-2" name="fecha_from" id="fecha_from" 
+                   value="{{ datetime.now(uruguay_tz).replace(month=1, day=1, hour=0, minute=0).strftime('%Y-%m-%dT%H:%M') }}">
+            <label class="mr-2" for="fecha_to">Hasta:</label>
+            <input type="datetime-local" class="form-control mr-2" name="fecha_to" id="fecha_to" 
+                   value="{{ datetime.now(uruguay_tz).strftime('%Y-%m-%dT%H:%M') }}">
+            <!-- Övriga filter -->
+            <label class="mr-2" for="nombre_filter">Nombre:</label>
+            <select class="form-control mr-2" name="nombre" id="nombre_filter">
+              <option value="">Todos</option>
+              {% for n in nombres %}
+                <option value="{{ n }}" {% if nombre_filter == n %}selected{% endif %}>{{ n }}</option>
+              {% endfor %}
+            </select>
+            <label class="mr-2" for="apellido_filter">Apellido:</label>
+            <select class="form-control mr-2" name="apellido" id="apellido_filter">
+              <option value="">Todos</option>
+              {% set apellidos = transacciones|map(attribute='user.last_name')|list|unique|sort %}
+              {% for a in apellidos %}
+                <option value="{{ a }}" {% if request.args.get('apellido') == a %}selected{% endif %}>{{ a }}</option>
+              {% endfor %}
+            </select>
+            <label class="mr-2" for="section_filter">Sección:</label>
+            <select class="form-control mr-2" name="section" id="section_filter">
+              <option value="">Todas</option>
+              {% for s in secciones %}
+                <option value="{{ s }}" {% if section_filter == s %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+            <label class="mr-2" for="tipo_filter">Tipo:</label>
+            <select class="form-control mr-2" name="tipo" id="tipo_filter">
+              <option value="">Todos</option>
+              {% for t in tipos %}
+                <option value="{{ t }}" {% if tipo_filter == t %}selected{% endif %}>{{ t }}</option>
+              {% endfor %}
+            </select>
+            <label class="mr-2" for="producto_filter">Producto:</label>
+            <select class="form-control mr-2" name="producto" id="producto_filter">
+              <option value="">Todos</option>
+              {% for p in productos %}
+                <option value="{{ p }}" {% if producto_filter == p %}selected{% endif %}>{{ p }}</option>
+              {% endfor %}
+            </select>
+            <label class="mr-2" for="variedad_filter">Variedad:</label>
+            <select class="form-control mr-2" name="variedad" id="variedad_filter">
+              <option value="">Todos</option>
+              {% for v in variedades %}
+                <option value="{{ v }}" {% if variedad_filter == v %}selected{% endif %}>{{ v }}</option>
+              {% endfor %}
+            </select>
+            <label class="mr-2" for="expense_category_filter">Categoría del egreso:</label>
+            <select class="form-control mr-2" name="expense_category" id="expense_category_filter">
+              <option value="">Todos</option>
+              <option value="Costos" {% if expense_category == 'Costos' %}selected{% endif %}>Costos</option>
+              <option value="Mano" {% if expense_category == 'Mano' %}selected{% endif %}>Mano</option>
+              <option value="Maquinaria" {% if expense_category == 'Maquinaria' %}selected{% endif %}>Maquinaria</option>
+              <option value="Empaque" {% if expense_category == 'Empaque' %}selected{% endif %}>Empaque</option>
+              <option value="Certificación" {% if expense_category == 'Certificación' %}selected{% endif %}>Certificación</option>
+              <option value="Otros" {% if expense_category == 'Otros' %}selected{% endif %}>Otros</option>
+            </select>
+            <label class="mr-2" for="moneda_filter">Moneda:</label>
+            <select class="form-control mr-2" name="moneda" id="moneda_filter">
+              <option value="">Todas</option>
+              {% for m in monedas %}
+                <option value="{{ m }}" {% if moneda_filter == m %}selected{% endif %}>{{ m }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+          </form>
+        </div>
+      </div>
+      <!-- Tabell innesluten i table-responsive -->
+      <div class="table-responsive">
+        <table id="tablaContabilidad" class="table table-striped">
+          <thead>
+            <tr>
+              <th style="font-weight:bold;">Fecha</th>
+              <th style="font-weight:bold;">Nombre</th>
+              <th style="font-weight:bold;">Apellido</th>
+              <th style="font-weight:bold;">Sección</th>
+              <th style="font-weight:bold;">Tipo</th>
+              <th style="font-weight:bold;">Producto</th>
+              <th style="font-weight:bold;">Variedad</th>
+              <th style="font-weight:bold;">Categoría del egreso</th>
+              <th style="font-weight:bold;">Monto</th>
+              <th style="font-weight:bold;">Moneda</th>
+              <th style="font-weight:bold;">Precio/Unidad</th>
+              <th style="font-weight:bold;">Descripción</th>
+              <th style="font-weight:bold;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for trans in transacciones %}
+            <tr>
+              <td>{{ trans.fecha.astimezone(uruguay_tz).strftime('%d/%m/%Y %H:%M:%S') }}</td>
+              <td>{{ trans.user.first_name }}</td>
+              <td>{{ trans.user.last_name }}</td>
+              <td>{{ trans.section }}</td>
+              <td>{{ trans.tipo }}</td>
+              <td>
+                {% if trans.tipo == 'ingreso' %}
+                  {{ trans.fruit }}
+                {% endif %}
+              </td>
+              <td>{{ trans.variety }}</td>
+              <td>
+                {% if trans.tipo == 'egreso' %}
+                  {{ trans.fruit }}
+                {% endif %}
+              </td>
+              <td>{{ trans.monto }}</td>
+              <td>{{ trans.moneda }}</td>
+              <td>
+                {% if trans.tipo == 'ingreso' and trans.cantidad and trans.cantidad > 0 and trans.unidad %}
+                  {{ (trans.monto / trans.cantidad) | round(2) }} {{ trans.moneda }}/
+                  {% if trans.unidad == 'cajones' %}cajón{% else %}kg{% endif %}
+                {% endif %}
+              </td>
+              <td>{{ trans.descripcion }}</td>
+              <td>
+                {% if current_user.id == trans.user_id %}
+                  <a href="{{ url_for('edit_transaction', trans_id=trans.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                  <form action="{{ url_for('delete_transaction', trans_id=trans.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar esta transacción?');">Eliminar</button>
+                  </form>
+                {% else %}
+                  <!-- Inga åtgärder visas för poster som inte skapats av den inloggade användaren -->
+                  -
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <!-- Sammanfattning -->
+      <div class="row mt-3">
+        <div class="col-md-6">
+          <h5>Resumen UYU</h5>
+          <p>Ingresos: {{ total_ingresos_uyu | round(2) }}</p>
+          <p>Egresos: {{ total_egresos_uyu | round(2) }}</p>
+          <p><strong>Total: {{ (total_ingresos_uyu - total_egresos_uyu) | round(2) }}</strong></p>
+        </div>
+        <div class="col-md-6">
+          <h5>Resumen USD</h5>
+          <p>Ingresos: {{ total_ingresos_usd | round(2) }}</p>
+          <p>Egresos: {{ total_egresos_usd | round(2) }}</p>
+          <p><strong>Total: {{ (total_ingresos_usd - total_egresos_usd) | round(2) }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

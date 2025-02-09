@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <h3>Transacciones Borradas</h3>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Sección</th>
+            <th>Descripción</th>
+            <th>Monto</th>
+            <th>Tipo</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for trans in transacciones %}
+          <tr>
+            <td>{{ trans.id }}</td>
+            <td>{{ trans.section }}</td>
+            <td>{{ trans.descripcion }}</td>
+            <td>{{ trans.monto }}</td>
+            <td>{{ trans.tipo }}</td>
+            <td>{{ trans.fecha.strftime('%d/%m/%Y %H:%M:%S') }}</td>
+            <td>
+              <a href="{{ url_for('restore_transaction', trans_id=trans.id) }}" class="btn btn-sm btn-success">Restaurar</a>
+              <form action="{{ url_for('permanent_delete_transaction', trans_id=trans.id) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar permanentemente esta transacción?');">Eliminar Permanentemente</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow">
+      <div class="card-header bg-success text-white">
+        <h4 class="mb-0">Editar Usuario</h4>
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          <div class="form-group">
+            <label for="first_name">Nombre (Primer Nombre)</label>
+            <input type="text" class="form-control" name="first_name" id="first_name" value="{{ user.first_name }}" required>
+          </div>
+          <div class="form-group">
+            <label for="last_name">Apellido</label>
+            <input type="text" class="form-control" name="last_name" id="last_name" value="{{ user.last_name }}" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Correo Electrónico</label>
+            <input type="email" class="form-control" name="email" id="email" value="{{ user.email }}" required>
+          </div>
+          <div class="form-group">
+            <label for="username">Nombre de Usuario</label>
+            <input type="text" class="form-control" name="username" id="username" value="{{ user.username }}" required>
+          </div>
+          <div class="form-group">
+            <label for="role">Rol</label>
+            <select class="form-control" name="role" id="role">
+              <option value="usuario" {% if user.role == 'usuario' %}selected{% endif %}>Usuario</option>
+              <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Administrador</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="section">Sección</label>
+            <select class="form-control" name="section" id="section" required>
+              <option value="Yacques" {% if user.section == 'Yacques' %}selected{% endif %}>Yacques</option>
+              <option value="Nicassio" {% if user.section == 'Nicassio' %}selected{% endif %}>Nicassio</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-success btn-block">Guardar Cambios</button>
+          <a href="{{ url_for('list_users') }}" class="btn btn-secondary btn-block">Cancelar</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

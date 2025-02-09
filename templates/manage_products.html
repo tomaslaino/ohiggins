@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <h3>Gestión de Productos y Variedades</h3>
+    <!-- Formulario para agregar un nuevo producto -->
+    <div class="card shadow mb-4">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0">Agregar Nuevo Producto</h5>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('manage_products') }}">
+          <input type="hidden" name="action" value="add_product">
+          <div class="form-group">
+            <label for="product_name">Nombre del Producto</label>
+            <input type="text" class="form-control" name="product_name" id="product_name" placeholder="Ej. Tomate" required>
+          </div>
+          <div class="form-group">
+            <label for="product_type">Tipo de Producto</label>
+            <select class="form-control" name="product_type" id="product_type" required>
+              <option value="Fruta">Fruta</option>
+              <option value="Verdura">Verdura</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-success">Agregar Producto</button>
+        </form>
+      </div>
+    </div>
+    <!-- Formulario para agregar una nueva variedad -->
+    <div class="card shadow mb-4">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0">Agregar Nueva Variedad</h5>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('manage_products') }}">
+          <input type="hidden" name="action" value="add_variety">
+          <div class="form-group">
+            <label for="product_id">Seleccione Producto</label>
+            <select class="form-control" name="product_id" id="product_id" required>
+              {% for prod in products %}
+                <option value="{{ prod.id }}">{{ prod.name }} ({{ prod.type }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="variety_name">Nombre de la Variedad</label>
+            <input type="text" class="form-control" name="variety_name" id="variety_name" placeholder="Ej. Roja" required>
+          </div>
+          <button type="submit" class="btn btn-success">Agregar Variedad</button>
+        </form>
+      </div>
+    </div>
+    <!-- Listado de productos registrados con botones de eliminación -->
+    <h4>Productos Registrados</h4>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Tipo</th>
+            <th>Variedades</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for prod in products %}
+          <tr>
+            <td>{{ prod.name }}</td>
+            <td>{{ prod.type }}</td>
+            <td>
+              {% if prod.varieties %}
+              <ul>
+                {% for var in prod.varieties %}
+                  <li>
+                    {{ var.name }}
+                    <form action="{{ url_for('delete_variety', variety_id=var.id) }}" method="POST" style="display:inline;">
+                      <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar esta variedad?');">Eliminar</button>
+                    </form>
+                  </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              Sin variedades
+              {% endif %}
+            </td>
+            <td>
+              <form action="{{ url_for('delete_product', product_id=prod.id) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar este producto?');">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

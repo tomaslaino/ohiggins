@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow">
+      <div class="card-header bg-success text-white">
+        <h4 class="mb-0">Agregar Nueva Transacción</h4>
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          <!-- Frivillig beskrivning -->
+          <div class="form-group">
+            <label for="descripcion">Descripción (opcional)</label>
+            <input type="text" class="form-control" name="descripcion" id="descripcion" placeholder="Ej. Venta de fruta">
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-3">
+              <label for="monto">Monto</label>
+              <input type="number" step="0.01" class="form-control" name="monto" id="monto" required>
+            </div>
+            <div class="form-group col-md-3">
+              <label for="moneda">Moneda</label>
+              <select class="form-control" name="moneda" id="moneda" required>
+                <option value="UYU">UYU</option>
+                <option value="USD">USD</option>
+              </select>
+            </div>
+            <div class="form-group col-md-3">
+              <label for="fruit">Fruta</label>
+              <select class="form-control" name="fruit" id="fruit">
+                <option value="">-- Seleccione --</option>
+                <option value="Persikor">Persikor</option>
+                <option value="Äpplen">Äpplen</option>
+                <option value="Päron">Päron</option>
+                <option value="Citron">Citron</option>
+                <option value="Lime">Lime</option>
+                <option value="Vindruvor">Vindruvor</option>
+                <option value="Granatäpplen">Granatäpplen</option>
+                <option value="Fikon">Fikon</option>
+              </select>
+            </div>
+            <div class="form-group col-md-3">
+              <label for="variety">Variedad</label>
+              <input type="text" class="form-control" name="variety" id="variety" placeholder="Ej. Ingrid Marie">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="tipo">Tipo</label>
+            <select class="form-control" name="tipo" id="tipo" required>
+              <option value="ingreso">Ingreso</option>
+              <option value="egreso">Egreso</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-success btn-block">Agregar Transacción</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

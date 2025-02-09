@@ -1,0 +1,95 @@
+/* Grundläggande typografi och bakgrund */
+body {
+  font-family: 'Roboto', sans-serif;
+  background: url('https://source.unsplash.com/1600x900/?organic,farm,uruguay') no-repeat center center fixed;
+  background-size: cover;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+/* Navigationsmeny med transparent vit bakgrund och skugga */
+.navbar {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: background-color 0.3s ease;
+}
+
+/* Hover-effekt på navigationslänkar */
+.navbar-nav .nav-link {
+  transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #007bff;
+}
+
+/* Innehåll-wrapper med extra övre padding */
+.content-wrapper {
+  padding-top: 100px;
+}
+
+/* Card-layout med rundade hörn och subtil skugga */
+.card {
+  background-color: rgba(255, 255, 255, 0.98);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Marginaler för containern */
+.container {
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+
+/* Breadcrumb-styling */
+.breadcrumb {
+  background-color: rgba(255,255,255,0.8);
+  border-radius: 5px;
+  padding: 8px 15px;
+}
+
+/* Alerts med extra marginal */
+.alert {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/* Responsiv tabell */
+.table-responsive {
+  margin-bottom: 0;
+}
+
+/* Media Queries för mobilanpassning */
+@media (max-width: 768px) {
+  .navbar-nav {
+    text-align: center;
+  }
+  .content-wrapper {
+    padding-top: 120px;
+  }
+  .breadcrumb {
+    font-size: 0.9rem;
+  }
+}
+
+/* CSS-transitioner för knappar */
+.btn {
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn:hover {
+  transform: scale(1.05);
+}
+
+/* Små animeringar vid hover på dropdown- och andra interaktiva element */
+.dropdown-menu {
+  transition: opacity 0.3s ease;
+}

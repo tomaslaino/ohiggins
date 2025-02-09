@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow">
+      <div class="card-header bg-success text-white">
+        <h4 class="mb-0">Agregar Ingreso</h4>
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          <!-- Monto och Moneda i rad -->
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="monto">Monto</label>
+              <input type="number" step="0.01" class="form-control" name="monto" id="monto" required>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="moneda">Moneda</label>
+              <select class="form-control" name="moneda" id="moneda" required>
+                <option value="UYU">UYU</option>
+                <option value="USD">USD</option>
+              </select>
+            </div>
+          </div>
+          <!-- Fecha med Uruguayansk tid (default: dagens datum) -->
+          <div class="form-group">
+            <label for="fecha">Fecha</label>
+            <input type="datetime-local" class="form-control" name="fecha" id="fecha" 
+                   value="{{ datetime.now(uruguay_tz).strftime('%Y-%m-%dT%H:%M') }}">
+          </div>
+          <!-- Om admin: Sección del ingreso -->
+          {% if current_user.role == 'admin' %}
+          <div class="form-group">
+            <label for="section_expense_ingreso">Sección del ingreso</label>
+            <select class="form-control" name="section_expense_ingreso" id="section_expense_ingreso" required>
+              <option value="Yacques">Yacques</option>
+              <option value="Nicassio">Nicassio</option>
+              <option value="Otros">Otros</option>
+            </select>
+          </div>
+          {% endif %}
+          <!-- Categoría de producto -->
+          <div class="form-group">
+            <label>Producto:</label><br>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="fruit_category" id="categoria_fruta" value="Fruta" checked>
+              <label class="form-check-label" for="categoria_fruta">Fruta</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="fruit_category" id="categoria_verdura" value="Verdura">
+              <label class="form-check-label" for="categoria_verdura">Verdura</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="fruit_category" id="categoria_otros" value="Otros">
+              <label class="form-check-label" for="categoria_otros">Otros</label>
+            </div>
+          </div>
+          <!-- Block för Fruta -->
+          <div id="block_fruta" style="display:block;">
+            <div class="form-group">
+              <label for="fruit_id">Producto (Fruta)</label>
+              <select class="form-control" name="fruit_id" id="fruit_id">
+                <option value="">-- Seleccione --</option>
+                {% for prod in fruits %}
+                  <option value="{{ prod.id }}" {% if default_product_id and prod.id == default_product_id %}selected{% endif %}>{{ prod.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="variety_select">Variedad</label>
+              <select class="form-control" name="variety_select" id="variety_select">
+                <option value="">-- Seleccione --</option>
+                <!-- Alternativen fylls via JavaScript -->
+              </select>
+            </div>
+          </div>
+          <!-- Block för Verdura -->
+          <div id="block_verdura" style="display:none;">
+            <div class="form-group">
+              <label for="verdura_id">Producto (Verdura)</label>
+              <select class="form-control" name="verdura_id" id="verdura_id">
+                <option value="">-- Seleccione --</option>
+                {% for prod in verduras %}
+                  <option value="{{ prod.id }}">{{ prod.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="variety_select_verdura">Variedad</label>
+              <select class="form-control" name="variety_select_verdura" id="variety_select_verdura">
+                <option value="">-- Seleccione --</option>
+                <!-- Alternativen fylls via JavaScript -->
+              </select>
+            </div>
+          </div>
+          <!-- Block för Otros -->
+          <div id="block_otro" style="display:none;">
+            <p>Para productos "Otros", ingrese únicamente la Descripción.</p>
+          </div>
+          <!-- Block för Cantidad och Unidad -->
+          <div class="form-row" id="div_cantidad_unidad">
+            <div class="form-group col-md-6">
+              <label for="cantidad">Cantidad</label>
+              <input type="number" step="0.01" class="form-control" name="cantidad" id="cantidad" placeholder="Ej. 20">
+            </div>
+            <div class="form-group col-md-6">
+              <label for="unidad">Unidad</label>
+              <select class="form-control" name="unidad" id="unidad">
+                <option value="cajones">Cajones</option>
+                <option value="kilos">Kilos</option>
+              </select>
+            </div>
+          </div>
+          <!-- Descripción -->
+          <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <textarea class="form-control" name="descripcion" id="descripcion" rows="2" placeholder="Ej. Industria..."></textarea>
+          </div>
+          <input type="hidden" name="tipo" value="ingreso">
+          <button type="submit" class="btn btn-success btn-block">Agregar Ingreso</button>
+        </form>
+        <br>
+        <!-- Länk till sidan för att hantera productos -->
+        <div class="text-center">
+          <a href="{{ url_for('manage_products') }}" class="btn btn-link">Gestionar Productos y Verduras</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Hämta referenser till radio-knappar och block
+  const radioFruta = document.getElementById("categoria_fruta");
+  const radioVerdura = document.getElementById("categoria_verdura");
+  const radioOtros = document.getElementById("categoria_otros");
+  const blockFruta = document.getElementById("block_fruta");
+  const blockVerdura = document.getElementById("block_verdura");
+  const blockOtro = document.getElementById("block_otro");
+  const divCantidadUnidad = document.getElementById("div_cantidad_unidad");
+
+  function toggleCategory() {
+    if (radioFruta.checked) {
+      blockFruta.style.display = "block";
+      blockVerdura.style.display = "none";
+      blockOtro.style.display = "none";
+      divCantidadUnidad.style.display = "flex";
+    } else if (radioVerdura.checked) {
+      blockFruta.style.display = "none";
+      blockVerdura.style.display = "block";
+      blockOtro.style.display = "none";
+      divCantidadUnidad.style.display = "flex";
+    } else if (radioOtros.checked) {
+      blockFruta.style.display = "none";
+      blockVerdura.style.display = "none";
+      blockOtro.style.display = "block";
+      divCantidadUnidad.style.display = "none";
+    }
+  }
+  radioFruta.addEventListener("change", toggleCategory);
+  radioVerdura.addEventListener("change", toggleCategory);
+  radioOtros.addEventListener("change", toggleCategory);
+  toggleCategory();
+
+  // Uppdatera alternativ för Variedad (Fruta)
+  const fruitSelect = document.getElementById("fruit_id");
+  const varietySelect = document.getElementById("variety_select");
+  const fruitVarieties = {{ fruit_varieties|safe }};
+  function updateFruitVarietyOptions() {
+    const fruitId = fruitSelect.value;
+    varietySelect.innerHTML = "";
+    let blankOption = document.createElement("option");
+    blankOption.value = "";
+    blankOption.textContent = "-- Seleccione --";
+    varietySelect.appendChild(blankOption);
+    if (fruitVarieties[fruitId] && fruitVarieties[fruitId].length > 0) {
+      fruitVarieties[fruitId].forEach(function(variety) {
+        const option = document.createElement("option");
+        option.value = variety;
+        option.textContent = variety;
+        if ("{{ default_variety }}" === variety) {
+          option.selected = true;
+        }
+        varietySelect.appendChild(option);
+      });
+    } else {
+      let option = document.createElement("option");
+      option.value = "";
+      option.textContent = "Sin variedades";
+      option.style.color = "black";
+      varietySelect.appendChild(option);
+    }
+  }
+  fruitSelect.addEventListener("change", updateFruitVarietyOptions);
+  updateFruitVarietyOptions();
+
+  // Uppdatera alternativ för Variedad (Verdura)
+  const verduraSelect = document.getElementById("verdura_id");
+  const varietySelectVerdura = document.getElementById("variety_select_verdura");
+  const verduraVarieties = {{ verdura_varieties|safe }};
+  function updateVerduraVarietyOptions() {
+    const verduraId = verduraSelect.value;
+    varietySelectVerdura.innerHTML = "";
+    let blankOption = document.createElement("option");
+    blankOption.value = "";
+    blankOption.textContent = "-- Seleccione --";
+    varietySelectVerdura.appendChild(blankOption);
+    if (verduraVarieties[verduraId] && verduraVarieties[verduraId].length > 0) {
+      verduraVarieties[verduraId].forEach(function(variety) {
+        const option = document.createElement("option");
+        option.value = variety;
+        option.textContent = variety;
+        if ("{{ default_variety }}" === variety) {
+          option.selected = true;
+        }
+        varietySelectVerdura.appendChild(option);
+      });
+    } else {
+      let option = document.createElement("option");
+      option.value = "";
+      option.textContent = "Sin variedades";
+      option.style.color = "black";
+      varietySelectVerdura.appendChild(option);
+    }
+  }
+  if(verduraSelect && varietySelectVerdura) {
+    verduraSelect.addEventListener("change", updateVerduraVarietyOptions);
+    updateVerduraVarietyOptions();
+  }
+});
+</script>
+{% endblock %}

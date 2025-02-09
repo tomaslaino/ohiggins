@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow">
+      <div class="card-header bg-success text-white">
+        {% if signup_mode %}
+          <h4 class="mb-0">Registrarse</h4>
+        {% else %}
+          <h4 class="mb-0">Registrar Nuevo Usuario</h4>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          <div class="form-group">
+            <label for="first_name">Nombre (Primer Nombre)</label>
+            <input type="text" class="form-control" name="first_name" id="first_name" required>
+          </div>
+          <div class="form-group">
+            <label for="last_name">Apellido</label>
+            <input type="text" class="form-control" name="last_name" id="last_name" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Correo Electrónico</label>
+            <input type="email" class="form-control" name="email" id="email" required>
+          </div>
+          <div class="form-group">
+            <label for="username">Nombre de Usuario</label>
+            <input type="text" class="form-control" name="username" id="username" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Contraseña (mínimo 4 caracteres)</label>
+            <input type="password" class="form-control" name="password" id="password" required>
+          </div>
+          <div class="form-group">
+            <label>Rol:</label><br>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="role" id="role_usuario" value="usuario" checked>
+              <label class="form-check-label" for="role_usuario">Usuario</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="role" id="role_admin" value="admin">
+              <label class="form-check-label" for="role_admin">Administrador</label>
+            </div>
+          </div>
+          <!-- Div för Usuario -->
+          <div class="form-group" id="div_section">
+            <label for="section">Sección</label>
+            <select class="form-control" name="section" id="section" required>
+              <option value="Yacques">Yacques</option>
+              <option value="Nicassio">Nicassio</option>
+            </select>
+          </div>
+          <!-- Div för Administrador -->
+          <div class="form-group" id="div_admin_secret" style="display:none;">
+            <label for="admin_secret">Contraseña Secreta (solo para administradores)</label>
+            <input type="password" class="form-control" name="admin_secret" id="admin_secret">
+          </div>
+          <button type="submit" class="btn btn-success btn-block">
+            {% if signup_mode %}
+              Registrarse
+            {% else %}
+              Registrar
+            {% endif %}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const usuarioRadio = document.getElementById("role_usuario");
+  const adminRadio = document.getElementById("role_admin");
+  const divSection = document.getElementById("div_section");
+  const divAdminSecret = document.getElementById("div_admin_secret");
+
+  function toggleRoleFields() {
+    if (usuarioRadio.checked) {
+      divSection.style.display = "block";
+      divAdminSecret.style.display = "none";
+    } else if (adminRadio.checked) {
+      divSection.style.display = "none";
+      divAdminSecret.style.display = "block";
+    }
+  }
+  usuarioRadio.addEventListener("change", toggleRoleFields);
+  adminRadio.addEventListener("change", toggleRoleFields);
+  toggleRoleFields();
+});
+</script>
+{% endblock %}

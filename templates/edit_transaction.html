@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow">
+      <div class="card-header bg-success text-white">
+        <h4 class="mb-0">Editar Transacción</h4>
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          <!-- Monto och Moneda -->
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="monto">Monto</label>
+              <input type="number" step="0.01" class="form-control" name="monto" id="monto" value="{{ trans.monto }}" required>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="moneda">Moneda</label>
+              <select class="form-control" name="moneda" id="moneda" required>
+                <option value="UYU" {% if trans.moneda == 'UYU' %}selected{% endif %}>UYU</option>
+                <option value="USD" {% if trans.moneda == 'USD' %}selected{% endif %}>USD</option>
+              </select>
+            </div>
+          </div>
+          <!-- Fecha -->
+          <div class="form-group">
+            <label for="fecha">Fecha</label>
+            <input type="datetime-local" class="form-control" name="fecha" id="fecha" value="{{ trans.fecha.astimezone(uruguay_tz).strftime('%Y-%m-%dT%H:%M') }}">
+          </div>
+          
+          {% if trans.tipo == 'ingreso' %}
+            {# För inlägg med trans.tipo 'ingreso' – visa produktval, variation samt fält för Cantidad och Unidad #}
+            {# För att avgöra vilken kategori som skall väljas, kan vi försöka identifiera om trans.fruit finns bland de produkter vi har #}
+            {% set default_category = 'Otros' %}
+            {% for prod in fruits %}
+              {% if prod.name == trans.fruit %}
+                {% set default_category = prod.type %}
+              {% endif %}
+            {% endfor %}
+            <!-- Radioknappar för produktkategori -->
+            <div class="form-group">
+              <label>Producto:</label><br>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="fruit_category" id="categoria_fruta" value="Fruta" {% if default_category == 'Fruta' %}checked{% endif %}>
+                <label class="form-check-label" for="categoria_fruta">Fruta</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="fruit_category" id="categoria_verdura" value="Verdura" {% if default_category == 'Verdura' %}checked{% endif %}>
+                <label class="form-check-label" for="categoria_verdura">Verdura</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="fruit_category" id="categoria_otros" value="Otros" {% if default_category == 'Otros' %}checked{% endif %}>
+                <label class="form-check-label" for="categoria_otros">Otros</label>
+              </div>
+            </div>
+            <!-- Block för Fruta -->
+            <div id="block_fruta" style="display: none;">
+              <div class="form-group">
+                <label for="fruit_id">Producto (Fruta)</label>
+                <select class="form-control" name="fruit_id" id="fruit_id">
+                  <option value="">-- Seleccione --</option>
+                  {% for prod in fruits %}
+                    <option value="{{ prod.id }}" {% if prod.name == trans.fruit %}selected{% endif %}>{{ prod.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="variety_select">Variedad</label>
+                <select class="form-control" name="variety_select" id="variety_select">
+                  <option value="">-- Seleccione --</option>
+                  <!-- Alternativen fylls med JavaScript -->
+                </select>
+              </div>
+            </div>
+            <!-- Block för Verdura -->
+            <div id="block_verdura" style="display: none;">
+              <div class="form-group">
+                <label for="verdura_id">Producto (Verdura)</label>
+                <select class="form-control" name="verdura_id" id="verdura_id">
+                  <option value="">-- Seleccione --</option>
+                  {% for prod in verduras %}
+                    <option value="{{ prod.id }}" {% if prod.name == trans.fruit %}selected{% endif %}>{{ prod.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="variety_select_verdura">Variedad</label>
+                <select class="form-control" name="variety_select_verdura" id="variety_select_verdura">
+                  <option value="">-- Seleccione --</option>
+                  <!-- Alternativen fylls med JavaScript -->
+                </select>
+              </div>
+            </div>
+            <!-- Block för Otros -->
+            <div id="block_otro" style="display: none;">
+              <p>Para productos "Otros", ingrese únicamente la Descripción.</p>
+            </div>
+            <!-- Fält för Cantidad och Unidad -->
+            <div class="form-row" id="div_cantidad_unidad">
+              <div class="form-group col-md-6">
+                <label for="cantidad">Cantidad</label>
+                <input type="number" step="0.01" class="form-control" name="cantidad" id="cantidad" value="{{ trans.cantidad }}" required>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="unidad">Unidad</label>
+                <select class="form-control" name="unidad" id="unidad" required>
+                  <option value="cajones" {% if trans.unidad == 'cajones' %}selected{% endif %}>Cajones</option>
+                  <option value="kilos" {% if trans.unidad == 'kilos' %}selected{% endif %}>Kilos</option>
+                </select>
+              </div>
+            </div>
+          {% elif trans.tipo == 'egreso' %}
+            <!-- För transaktioner av typen egreso: visa dropdown för Categoría del egreso -->
+            <div class="form-group">
+              <label for="expense_category">
+                Categoría del egreso
+                <button type="button" class="btn btn-sm btn-info" data-toggle="popover" data-trigger="focus"
+                        title="Categorías de Egreso"
+                        data-content="Costos: Costos de producción y operación. Mano: Costos de mano de obra. Maquinaria: Gastos en maquinaria y mantenimiento. Empaque: Costos de empaque y distribución. Certificación: Gastos en certificaciones y auditorías. Otros: Otros gastos no categorizados.">
+                  i
+                </button>
+              </label>
+              <select class="form-control" name="expense_category" id="expense_category" required>
+                <option value="Costos" {% if trans.fruit == 'Costos' %}selected{% endif %}>Costos</option>
+                <option value="Mano" {% if trans.fruit == 'Mano' %}selected{% endif %}>Mano</option>
+                <option value="Maquinaria" {% if trans.fruit == 'Maquinaria' %}selected{% endif %}>Maquinaria</option>
+                <option value="Empaque" {% if trans.fruit == 'Empaque' %}selected{% endif %}>Empaque</option>
+                <option value="Certificación" {% if trans.fruit == 'Certificación' %}selected{% endif %}>Certificación</option>
+                <option value="Otros" {% if trans.fruit == 'Otros' %}selected{% endif %}>Otros</option>
+              </select>
+            </div>
+          {% endif %}
+          <!-- Descripción -->
+          <div class="form-group">
+            <label for="descripcion">Descripción (opcional)</label>
+            <textarea class="form-control" name="descripcion" id="descripcion" rows="2" placeholder="Ej. Calidad excelente...">{{ trans.descripcion }}</textarea>
+          </div>
+          <input type="hidden" name="tipo" value="{{ trans.tipo }}">
+          <button type="submit" class="btn btn-success btn-block">Guardar Cambios</button>
+          <a href="{{ url_for('contabilidad') }}" class="btn btn-secondary btn-block">Cancelar</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Funktion för att visa rätt block beroende på vald kategori (endast om trans.tipo är 'ingreso')
+  const radioFruta = document.getElementById("categoria_fruta");
+  const radioVerdura = document.getElementById("categoria_verdura");
+  const radioOtros = document.getElementById("categoria_otros");
+  const blockFruta = document.getElementById("block_fruta");
+  const blockVerdura = document.getElementById("block_verdura");
+  const blockOtro = document.getElementById("block_otro");
+  const divCantidadUnidad = document.getElementById("div_cantidad_unidad");
+
+  function toggleCategory() {
+    if (radioFruta.checked) {
+      blockFruta.style.display = "block";
+      blockVerdura.style.display = "none";
+      blockOtro.style.display = "none";
+      divCantidadUnidad.style.display = "flex";
+    } else if (radioVerdura.checked) {
+      blockFruta.style.display = "none";
+      blockVerdura.style.display = "block";
+      blockOtro.style.display = "none";
+      divCantidadUnidad.style.display = "flex";
+    } else if (radioOtros.checked) {
+      blockFruta.style.display = "none";
+      blockVerdura.style.display = "none";
+      blockOtro.style.display = "block";
+      divCantidadUnidad.style.display = "none";
+    }
+  }
+  if(radioFruta && radioVerdura && radioOtros){
+    radioFruta.addEventListener("change", toggleCategory);
+    radioVerdura.addEventListener("change", toggleCategory);
+    radioOtros.addEventListener("change", toggleCategory);
+    toggleCategory();
+  }
+
+  // Om trans.tipo är 'ingreso', uppdatera alternativ för "Variedad" för Fruta
+  {% if trans.tipo == 'ingreso' %}
+  const fruitSelect = document.getElementById("fruit_id");
+  const varietySelect = document.getElementById("variety_select");
+  const fruitVarieties = {{ fruit_varieties|safe }};
+  function updateFruitVarietyOptions() {
+    const fruitId = fruitSelect.value;
+    varietySelect.innerHTML = "";
+    let blankOption = document.createElement("option");
+    blankOption.value = "";
+    blankOption.textContent = "-- Seleccione --";
+    varietySelect.appendChild(blankOption);
+    if (fruitVarieties[fruitId] && fruitVarieties[fruitId].length > 0) {
+      fruitVarieties[fruitId].forEach(function(variety) {
+        const option = document.createElement("option");
+        option.value = variety;
+        option.textContent = variety;
+        if ("{{ trans.variety }}" === variety) {
+          option.selected = true;
+        }
+        varietySelect.appendChild(option);
+      });
+    } else {
+      let option = document.createElement("option");
+      option.value = "";
+      option.textContent = "Sin variedades";
+      option.style.color = "black";
+      varietySelect.appendChild(option);
+    }
+  }
+  if(fruitSelect && varietySelect){
+    fruitSelect.addEventListener("change", updateFruitVarietyOptions);
+    updateFruitVarietyOptions();
+  }
+  {% endif %}
+});
+</script>
+{% endblock %}
