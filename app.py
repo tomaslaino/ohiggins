@@ -2,7 +2,7 @@ from flask import Flask, render_template, redirect, url_for, request, flash, jso
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_migrate import Migrate  # Importa Flask-Migrate
+from flask_migrate import Migrate  # Importera Flask-Migrate
 import os, re, json
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo  # För att sätta Uruguayansk tid
@@ -43,21 +43,21 @@ class User(UserMixin, db.Model):
     last_description = db.Column(db.Text, default="")
     last_product_id = db.Column(db.Integer, nullable=True)
     last_variety = db.Column(db.String(100), nullable=True)
-    approved = db.Column(db.Boolean, default=False)  # Nuevo campo: la cuenta debe ser aprobada
+    approved = db.Column(db.Boolean, default=False)  # Kontot måste godkännas av en administratör
 
 class Transaccion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     descripcion = db.Column(db.String(500), nullable=False)
     monto = db.Column(db.Float, nullable=False)
-    tipo = db.Column(db.String(20), nullable=False)     # "ingreso" o "egreso"
-    moneda = db.Column(db.String(10), nullable=False)     # "UYU" o "USD"
+    tipo = db.Column(db.String(20), nullable=False)     # "ingreso" eller "egreso"
+    moneda = db.Column(db.String(10), nullable=False)     # "UYU" eller "USD"
     fecha = db.Column(db.DateTime, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    fruit = db.Column(db.String(50), nullable=True)       # Para ingreso: producto (fruta/verdura); para egreso: categoría de egreso
-    variety = db.Column(db.String(100), nullable=True)    # Solo si es relevante (fruta/verdura)
-    cantidad = db.Column(db.Float, nullable=True)         # Solo para ingreso
-    unidad = db.Column(db.String(50), nullable=True)      # "cajones" o "kilos" (ingreso)
-    section = db.Column(db.String(100), nullable=True)    # Indica a qué finca pertenece la transacción
+    fruit = db.Column(db.String(50), nullable=True)       # För ingreso: produkt (fruta/verdura); för egreso: kategori för egreso
+    variety = db.Column(db.String(100), nullable=True)    # Endast om relevant (fruta/verdura)
+    cantidad = db.Column(db.Float, nullable=True)         # Endast för ingreso
+    unidad = db.Column(db.String(50), nullable=True)      # "cajones" eller "kilos" (ingreso)
+    section = db.Column(db.String(100), nullable=True)    # Anger vilken gård transaktionen tillhör
     updated_at = db.Column(db.DateTime, nullable=True)
     update_history = db.Column(db.Text, nullable=True)
     deleted = db.Column(db.Boolean, default=False)
@@ -66,7 +66,7 @@ class Transaccion(db.Model):
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    type = db.Column(db.String(20), nullable=False)  # "Fruta" o "Verdura"
+    type = db.Column(db.String(20), nullable=False)  # "Fruta" eller "Verdura"
     added_at = db.Column(db.DateTime, default=datetime.now(ZoneInfo("America/Montevideo")))
     added_by = db.Column(db.Integer, db.ForeignKey('user.id'))
     varieties = db.relationship('Variety', backref='product', lazy=True)
@@ -79,22 +79,20 @@ class Variety(db.Model):
     added_by = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 # ------------------------------
-# Funciones auxiliares y user loader
+# Hjälpfunktioner och user loader
 # ------------------------------
 
 @login_manager.user_loader
 def load_user(user_id):
-    # Usamos db.session.get() (recomendado en SQLAlchemy 2.0)
     return db.session.get(User, int(user_id))
 
 def parse_fecha(fecha_str):
     try:
-        # Retorna la fecha en hora de Montevideo
         return datetime.fromisoformat(fecha_str).astimezone(ZoneInfo("America/Montevideo"))
     except Exception:
         return None
 
-# Context processor para inyectar el conteo de usuarios pendientes en las plantillas
+# Context processor: injicera antal pending-användare (endast för admin)
 @app.context_processor
 def inject_pending_count():
     if current_user.is_authenticated and current_user.role == 'admin':
@@ -103,7 +101,7 @@ def inject_pending_count():
     return {}
 
 # ------------------------------
-# Rutas
+# Rutter
 # ------------------------------
 
 @app.route('/')
@@ -113,7 +111,6 @@ def bienvenida():
 @app.route('/contabilidad')
 @login_required
 def contabilidad():
-    # Obtener parámetros de filtro
     tipo_filter = request.args.get('tipo')
     moneda_filter = request.args.get('moneda')
     fecha_from = request.args.get('fecha_from')
@@ -124,7 +121,6 @@ def contabilidad():
     expense_category = request.args.get('expense_category')
     nombre_filter = request.args.get('nombre')
     
-    # Si el usuario no es admin, mostrar solo transacciones de su sección
     if current_user.role == 'admin':
         query = Transaccion.query.filter_by(deleted=False)
         if section_filter:
@@ -163,7 +159,6 @@ def contabilidad():
     total_ingresos_usd = sum(t.monto for t in transacciones if t.tipo == 'ingreso' and t.moneda == 'USD')
     total_egresos_usd = sum(t.monto for t in transacciones if t.tipo == 'egreso' and t.moneda == 'USD')
     
-    # Crear listas con valores únicos para los filtros
     nombres = sorted({ f"{t.user.first_name} {t.user.last_name}" for t in transacciones if t.user and t.user.first_name })
     secciones = sorted({ t.section for t in transacciones if t.section })
     tipos = sorted({ t.tipo for t in transacciones if t.tipo })
@@ -234,14 +229,14 @@ def register():
         role = request.form.get('role')
         if role == 'usuario':
             section = request.form.get('section')
-            approved = False  # Los usuarios comunes deben ser aprobados
+            approved = False  # Usuarios comunes måste godkännas
         else:
             admin_secret = request.form.get('admin_secret')
             if admin_secret != 'tomtenärfartillallabarnen':
                 flash("Contraseña secreta de administrador incorrecta.", "danger")
                 return redirect(url_for('register'))
             section = "Admin"
-            approved = True  # Los administradores se aprueban directamente
+            approved = True  # Admin godkänns direkt
         if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
             flash("Correo electrónico no válido.", "danger")
             return redirect(url_for('register'))
@@ -399,7 +394,7 @@ def edit_transaction(trans_id):
     if not trans:
         flash("La transacción no fue encontrada.", "danger")
         return redirect(url_for('contabilidad'))
-    # Solo el usuario creador o un admin pueden editar
+    # Endast ägaren eller admin kan redigera
     if current_user.role != 'admin' and current_user.id != trans.user_id:
         flash("No tienes permiso para editar esta transacción.", "danger")
         return redirect(url_for('contabilidad'))
@@ -457,7 +452,7 @@ def edit_transaction(trans_id):
         fruits = Product.query.filter_by(type="Fruta").all()
         fruit_varieties = { prod.id: [v.name for v in prod.varieties] for prod in fruits }
         return render_template('edit_transaction.html', trans=trans, fruits=fruits, fruit_varieties=json.dumps(fruit_varieties))
-    
+
 @app.route('/delete_transaction/<int:trans_id>', methods=['POST'])
 @login_required
 def delete_transaction(trans_id):
@@ -682,8 +677,6 @@ def approve_user(user_id):
 # Programa principal
 # ------------------------------
 if __name__ == '__main__':
-    # Si no usas Flask-Migrate y estás en desarrollo, puedes borrar la base de datos y crear una nueva.
-    # Por ejemplo: os.remove('ohiggins.db')  (¡ATENCIÓN! Esto borrará todos los datos)
     with app.app_context():
         db.create_all()
         if not User.query.filter_by(username='admin').first():
@@ -699,7 +692,5 @@ if __name__ == '__main__':
             )
             db.session.add(admin)
             db.session.commit()
-    app.run(debug=True)
-if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
