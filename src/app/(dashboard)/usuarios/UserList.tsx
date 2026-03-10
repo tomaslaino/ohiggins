@@ -49,46 +49,49 @@ export default function UserList({
   return (
     <ul className="divide-y divide-[var(--border)]">
       {users.map((u) => (
-        <li key={u.id} className="px-4 py-3 flex flex-wrap justify-between items-center gap-2 text-sm">
-          <div>
+        <li key={u.id} className="px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-sm">
+          <div className="min-w-0 flex-1">
             <p className="font-medium text-[var(--foreground)]">{u.name}</p>
-            <p className="text-[var(--muted)]">{u.email}</p>
+            <p className="text-[var(--muted)] truncate">{u.email}</p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-1 rounded bg-[var(--border)] text-[var(--muted)] text-xs">
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="px-2 py-1 rounded bg-[var(--border)] text-[var(--muted)] text-xs whitespace-nowrap">
               {u.role === "ADMIN" ? "Administrador" : "Usuario"}
             </span>
-            <span className="text-[var(--muted)] text-xs">{formatDate(u.createdAt)}</span>
-            {u.id !== currentUserId && (
+            <span className="text-[var(--muted)] text-xs whitespace-nowrap">{formatDate(u.createdAt)}</span>
+            {u.id !== currentUserId ? (
               confirmId === u.id ? (
-                <span className="flex items-center gap-1">
-                  <span className="text-xs text-[var(--muted)]">¿Eliminar?</span>
+                <span className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs text-[var(--muted)]">¿Eliminar a este usuario?</span>
                   <button
                     type="button"
                     onClick={() => handleDelete(u.id)}
                     disabled={!!deletingId}
-                    className="py-1 px-2 rounded text-xs font-medium bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+                    className="py-2 px-3 rounded-lg text-xs font-medium bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
                   >
-                    {deletingId === u.id ? "…" : "Sí"}
+                    {deletingId === u.id ? "…" : "Sí, eliminar"}
                   </button>
                   <button
                     type="button"
                     onClick={() => setConfirmId(null)}
                     disabled={!!deletingId}
-                    className="py-1 px-2 rounded text-xs font-medium border border-[var(--border)] hover:bg-[var(--border)]"
+                    className="py-2 px-3 rounded-lg text-xs font-medium border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--border)]"
                   >
-                    No
+                    Cancelar
                   </button>
                 </span>
               ) : (
                 <button
                   type="button"
                   onClick={() => setConfirmId(u.id)}
-                  className="py-1 px-2 rounded text-xs font-medium text-red-600 hover:bg-red-50"
+                  className="py-2 px-3 rounded-lg text-xs font-medium text-red-600 border border-red-300 bg-red-50 hover:bg-red-100"
+                  title="Eliminar usuario"
                 >
-                  Eliminar
+                  Eliminar usuario
                 </button>
               )
+            ) : (
+              <span className="text-xs text-[var(--muted)]">(tú)</span>
             )}
           </div>
         </li>
