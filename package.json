@@ -10,6 +10,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
+    "db:clear-entries": "tsx prisma/clear-entries.ts",
     "postinstall": "prisma generate"
   },
   "prisma": {
