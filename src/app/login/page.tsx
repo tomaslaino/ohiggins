@@ -12,6 +12,8 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+  const registered = searchParams.get("registered") === "1";
+  const registeredName = searchParams.get("name") ?? "";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,6 +52,13 @@ function LoginForm() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 bg-[var(--card)] p-6 rounded-xl border border-[var(--border)] shadow-sm">
+          {registered && (
+            <p className="text-sm text-green-700 bg-green-50 py-2 px-3 rounded-lg">
+              {registeredName
+                ? `Cuenta creada. Bienvenido, ${registeredName}. Ahora puedes iniciar sesión.`
+                : "Cuenta creada. Ahora puedes iniciar sesión."}
+            </p>
+          )}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-[var(--foreground)] mb-1">
               Correo electrónico

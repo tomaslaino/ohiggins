@@ -1,11 +1,29 @@
 /**
  * Seed script: fills the database with demo data.
  * Run with: npm run db:seed
+ * Loads .env.local so DATABASE_URL/DIRECT_URL are available for Prisma (Neon).
  */
-import { PrismaClient } from "@prisma/client";
-import * as bcrypt from "bcryptjs";
+import { config } from "dotenv";
+import { resolve } from "path";
 
-const prisma = new PrismaClient();
+config({ path: resolve(process.cwd(), ".env.local") });
+
+// Fallback if .env.local wasn't loaded (e.g. wrong cwd)
+import { readFileSync, existsSync } from "fs";
+import { join } from "path";
+const envLocal = join(process.cwd(), ".env.local");
+if (!process.env.DATABASE_URL && existsSync(envLocal)) {
+  const content = readFileSync(envLocal, "utf8");
+  for (const line of content.split("\n")) {
+    const m = line.match(/^([^#=]+)=(.*)$/);
+    if (m) {
+      const key = m[1].trim();
+      let v = m[2].trim();
+      if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) v = v.slice(1, -1);
+      if (key && v !== undefined) process.env[key] = v;
+    }
+  }
+}
 
 const INGRESO_CATEGORIES = ["Ventas", "Fruta", "Verduras", "Otro"];
 const GASTO_CATEGORIES = [
@@ -22,6 +40,13 @@ const DEFAULT_FRUIT_TYPES = ["Cítricos", "Manzanas", "Otros"];
 const DEFAULT_VEGETABLE_TYPES = ["Tomate", "Lechuga", "Zanahoria", "Otros"];
 
 async function main() {
+  if (!process.env.DATABASE_URL || !process.env.DIRECT_URL) {
+    console.error("Saknar DATABASE_URL och/eller DIRECT_URL. Lägg båda i .env.local (samma Neon-URL:er som på Vercel).");
+    process.exit(1);
+  }
+  const { PrismaClient } = await import("@prisma/client");
+  const bcrypt = await import("bcryptjs");
+  const prisma = new PrismaClient();
   // Rename old Swedish "Frukt" to Spanish "Fruta" if it exists
   const fruktCat = await prisma.category.findFirst({ where: { name: "Frukt", type: "ingreso" } });
   if (fruktCat) {
@@ -74,7 +99,7 @@ async function main() {
   const vegMap = await prisma.vegetableType.findMany().then((list) => Object.fromEntries(list.map((v) => [v.name, v.id])));
 
   // Admin user (password: admin123)
-  const adminHash = await bcrypt.hash("admin123", 10);
+  const adminHash = await bcrypt.default.hash("admin123", 10);
   const admin = await prisma.user.upsert({
     where: { email: "admin@ohiggins.com" },
     update: {},
@@ -87,7 +112,7 @@ async function main() {
   });
 
   // Usuario (password: usuario123)
-  const userHash = await bcrypt.hash("usuario123", 10);
+  const userHash = await bcrypt.default.hash("usuario123", 10);
   const usuario = await prisma.user.upsert({
     where: { email: "usuario@ohiggins.com" },
     update: {},
@@ -114,12 +139,10 @@ async function main() {
   });
 
   console.log("Seed OK: admin@ohiggins.com (admin123), usuario@ohiggins.com (usuario123), categories (ingreso/gasto), fruit & vegetable types, sample entries.");
+  await prisma.$disconnect();
 }
 
-main()
-  .then(() => prisma.$disconnect())
-  .catch((e) => {
-    console.error(e);
-    prisma.$disconnect();
-    process.exit(1);
-  });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

@@ -2,21 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function RegistroPage() {
+  const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    setSuccess("");
     setLoading(true);
     try {
       const res = await fetch("/api/register", {
@@ -34,13 +34,11 @@ export default function RegistroPage() {
       if (!res.ok) {
         setError(data.error || "Error al crear la cuenta.");
       } else {
-        const displayName = firstName.trim() || data.name?.split(" ")[0] || "usuario";
-        setSuccess(`Cuenta creada. Bienvenido, ${displayName}. Ahora puedes iniciar sesión.`);
-        setFirstName("");
-        setLastName("");
-        setEmail("");
-        setPassword("");
-        setConfirmPassword("");
+        const name = firstName.trim() || data.name?.split(" ")[0] || "";
+        const params = new URLSearchParams({ registered: "1" });
+        if (name) params.set("name", name);
+        router.push(`/login?${params.toString()}`);
+        return;
       }
     } catch {
       setError("Error de conexión.");
@@ -55,14 +53,11 @@ export default function RegistroPage() {
           <h1 className="text-2xl font-semibold text-[var(--primary)]">
             Crear cuenta de usuario
           </h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            Solo se crean cuentas tipo <span className="font-semibold">Usuario</span>. Los administradores se configuran aparte.
-          </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4 bg-[var(--card)] p-6 rounded-xl border border-[var(--border)] shadow-sm">
           <div>
             <label htmlFor="firstName" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-              Nombre (p. ej. Tomas)
+              Nombre
             </label>
             <input
               id="firstName"
@@ -77,7 +72,7 @@ export default function RegistroPage() {
           </div>
           <div>
             <label htmlFor="lastName" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-              Apellido (p. ej. García)
+              Apellido
             </label>
             <input
               id="lastName"
@@ -134,9 +129,6 @@ export default function RegistroPage() {
           </div>
           {error && (
             <p className="text-sm text-red-600 bg-red-50 py-2 px-3 rounded-lg">{error}</p>
-          )}
-          {success && (
-            <p className="text-sm text-green-700 bg-green-50 py-2 px-3 rounded-lg">{success}</p>
           )}
           <button
             type="submit"
