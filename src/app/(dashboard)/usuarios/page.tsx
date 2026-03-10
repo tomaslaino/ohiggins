@@ -18,7 +18,7 @@ export default async function UsuariosPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-[var(--primary)] tracking-tight">Usuarios</h1>
-      <p className="text-sm text-[var(--muted)]">Solo administradores pueden ver esta página. Puedes eliminar otros usuarios (no a ti mismo).</p>
+      <p className="text-sm text-[var(--muted)]">Solo administradores pueden ver esta página. Puedes eliminar otros usuarios.</p>
       <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] shadow-sm overflow-hidden">
         <UserList users={users} currentUserId={session.user?.id ?? ""} />
       </div>

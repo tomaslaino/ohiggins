@@ -117,12 +117,12 @@ export default function NuevaEntradaPage() {
   }
 
   return (
-    <div className="max-w-lg mx-auto space-y-8">
-      <h1 className="text-2xl font-bold text-[var(--primary)] tracking-tight">Nueva entrada</h1>
-      <p className="text-sm text-[var(--muted)] -mt-4">
+    <div className="max-w-lg mx-auto space-y-6 md:space-y-8">
+      <h1 className="text-xl md:text-2xl font-bold text-[var(--primary)] tracking-tight">Nueva entrada</h1>
+      <p className="text-sm text-[var(--muted)] -mt-2 md:-mt-4">
         ¿Falta una categoría o tipo? <Link href="/configuracion" className="text-[var(--primary)] hover:underline">Agregar en Configuración</Link>
       </p>
-      <form onSubmit={handleSubmit} className="bg-[var(--card)] rounded-xl border border-[var(--border)] shadow-sm p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-[var(--card)] rounded-xl border border-[var(--border)] shadow-sm p-4 md:p-6 space-y-4">
         <div>
           <label htmlFor="date" className="block text-sm font-medium mb-1">Fecha</label>
           <input
@@ -131,14 +131,14 @@ export default function NuevaEntradaPage() {
             required
             value={form.date}
             onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-            className="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            className="w-full min-h-[48px] px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)] touch-manipulation"
           />
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Tipo</label>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             {ENTRY_TYPES.map((t) => (
-              <label key={t.value} className="flex items-center gap-2 cursor-pointer">
+              <label key={t.value} className="flex items-center gap-2 cursor-pointer min-h-[44px] touch-manipulation">
                 <input
                   type="radio"
                   name="type"
@@ -152,7 +152,7 @@ export default function NuevaEntradaPage() {
                     vegetableTypeId: "",
                     otroDetalle: "",
                   }))}
-                  className="w-5 h-5"
+                  className="w-5 h-5 shrink-0"
                 />
                 <span>{t.label}</span>
               </label>
@@ -166,7 +166,7 @@ export default function NuevaEntradaPage() {
             required
             value={form.categoryId}
             onChange={(e) => setForm((f) => ({ ...f, categoryId: e.target.value, fruitTypeId: "", vegetableTypeId: "", otroDetalle: "" }))}
-            className="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            className="w-full min-h-[48px] px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)] touch-manipulation"
           >
             <option value="">Seleccionar…</option>
             {categories.map((c) => (
@@ -188,7 +188,7 @@ export default function NuevaEntradaPage() {
                     id="fruitType"
                     value={form.fruitTypeId}
                     onChange={(e) => setForm((f) => ({ ...f, fruitTypeId: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                    className="w-full min-h-[48px] px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)] touch-manipulation"
                   >
                     <option value="">Ninguno</option>
                     {fruitTypes.map((f) => (
@@ -204,7 +204,7 @@ export default function NuevaEntradaPage() {
                     id="vegetableType"
                     value={form.vegetableTypeId}
                     onChange={(e) => setForm((f) => ({ ...f, vegetableTypeId: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                    className="w-full min-h-[48px] px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)] touch-manipulation"
                   >
                     <option value="">Ninguno</option>
                     {vegetableTypes.map((v) => (
@@ -221,7 +221,7 @@ export default function NuevaEntradaPage() {
                     type="text"
                     value={form.otroDetalle}
                     onChange={(e) => setForm((f) => ({ ...f, otroDetalle: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                    className="w-full min-h-[48px] px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)] touch-manipulation"
                     placeholder="Ej. Donación, subvención…"
                   />
                 </div>
@@ -231,16 +231,16 @@ export default function NuevaEntradaPage() {
         })()}
         <div>
           <label className="block text-sm font-medium mb-2">Moneda</label>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             {CURRENCIES.map((c) => (
-              <label key={c.value} className="flex items-center gap-2 cursor-pointer">
+              <label key={c.value} className="flex items-center gap-2 cursor-pointer min-h-[44px] touch-manipulation">
                 <input
                   type="radio"
                   name="currency"
                   value={c.value}
                   checked={form.currency === c.value}
                   onChange={() => setForm((f) => ({ ...f, currency: c.value as "UYU" | "USD" }))}
-                  className="w-5 h-5"
+                  className="w-5 h-5 shrink-0"
                 />
                 <span>{c.label}</span>
               </label>
@@ -257,7 +257,7 @@ export default function NuevaEntradaPage() {
             required
             value={form.amount}
             onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
-            className="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            className="w-full min-h-[48px] px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)] touch-manipulation"
             placeholder="0"
           />
         </div>
@@ -268,7 +268,7 @@ export default function NuevaEntradaPage() {
             type="text"
             value={form.description}
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            className="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            className="w-full min-h-[48px] px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)] touch-manipulation"
             placeholder="Ej. Venta fruta orgánica"
           />
         </div>
@@ -279,7 +279,7 @@ export default function NuevaEntradaPage() {
             rows={2}
             value={form.notes}
             onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-            className="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            className="w-full min-h-[80px] px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)] touch-manipulation"
             placeholder="Opcional"
           />
         </div>
@@ -294,7 +294,7 @@ export default function NuevaEntradaPage() {
             accept="image/*"
             capture="environment"
             onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-            className="w-full text-sm text-[var(--foreground)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--primary)] file:text-white file:font-medium file:cursor-pointer"
+            className="w-full text-sm text-[var(--foreground)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--primary)] file:text-white file:font-medium file:cursor-pointer file:min-h-[44px] touch-manipulation"
             aria-label="Añadir foto o imagen"
           />
           {imageFile && previewUrl && (
@@ -317,18 +317,18 @@ export default function NuevaEntradaPage() {
         {error && (
           <p className="text-sm text-red-600 bg-red-50 py-2 px-3 rounded-lg">{error}</p>
         )}
-        <div className="flex gap-3 pt-2">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 py-3 px-4 rounded-lg bg-[var(--primary)] text-white font-medium hover:opacity-90 disabled:opacity-60 transition-opacity"
+            className="flex-1 min-h-[48px] py-3 px-4 rounded-lg bg-[var(--primary)] text-white font-medium hover:opacity-90 disabled:opacity-60 transition-opacity touch-manipulation"
           >
             {loading ? "Guardando…" : "Guardar"}
           </button>
           <button
             type="button"
             onClick={() => router.back()}
-            className="py-3 px-4 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] font-medium hover:bg-[var(--border)] transition-colors"
+            className="min-h-[48px] py-3 px-4 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] font-medium hover:bg-[var(--border)] transition-colors touch-manipulation"
           >
             Cancelar
           </button>

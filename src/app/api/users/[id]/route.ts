@@ -18,7 +18,7 @@ export async function DELETE(
   }
   const { id } = await params;
   if (id === session.user.id) {
-    return NextResponse.json({ error: "No puedes eliminarte a ti mismo" }, { status: 400 });
+    return NextResponse.json({ error: "No puedes eliminarte a ti mismo desde aquí" }, { status: 400 });
   }
   const user = await prisma.user.findUnique({ where: { id } });
   if (!user) {
