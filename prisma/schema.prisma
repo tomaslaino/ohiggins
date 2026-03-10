@@ -1,0 +1,71 @@
+// Prisma schema: PostgreSQL (Neon, etc.) for production; use DATABASE_URL + DIRECT_URL for Neon.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// User: for login and "who registered" on entries
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   // "ADMIN" or "USUARIO"
+  createdAt DateTime @default(now())
+  entries   Entry[]
+}
+
+// Categories: each belongs to "ingreso" or "gasto"; list filtered by entry type
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   // "ingreso" or "gasto"
+  createdAt DateTime @default(now())
+  entries   Entry[]
+  @@unique([name, type])
+}
+
+// Fruit types: for entries with category "Fruta" (ingreso)
+model FruitType {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  entries   Entry[]
+}
+
+// Vegetable types: for entries with category "Verduras" (ingreso)
+model VegetableType {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  entries   Entry[]
+}
+
+// Entry: one bookkeeping row (income or expense)
+model Entry {
+  id                String          @id @default(cuid())
+  date              DateTime
+  type              String          // "ingreso" or "gasto"
+  categoryId        String
+  category          Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  fruitTypeId       String?
+  fruitType         FruitType?      @relation(fields: [fruitTypeId], references: [id], onDelete: SetNull)
+  vegetableTypeId   String?
+  vegetableType     VegetableType?  @relation(fields: [vegetableTypeId], references: [id], onDelete: SetNull)
+  amount            Float
+  currency          String          // "UYU" or "USD"
+  description       String
+  notes             String?
+  otroDetalle       String?         // when category is "Otro", optional specification
+  paymentMethod     String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  createdById       String?
+  createdBy         User?           @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  imagePath         String?         // optional receipt/photo, e.g. /uploads/entries/{id}.jpg
+}

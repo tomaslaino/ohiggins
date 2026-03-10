@@ -24,14 +24,22 @@
 .DS_Store
 *.pem
 
+# uploaded entry images
+/public/uploads
+
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# local SQLite (when using Postgres/Neon)
+prisma/dev.db
+*.db
+
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
