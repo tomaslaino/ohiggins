@@ -22,7 +22,7 @@ export default function UserList({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
-  function formatDate(d: Date) {
+  function formatDate(d: Date | string) {
     return new Intl.DateTimeFormat("es-UY", {
       day: "2-digit",
       month: "2-digit",
