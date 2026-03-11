@@ -8,6 +8,7 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [adminCode, setAdminCode] = useState("");
+  const [showAdminCode, setShowAdminCode] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
@@ -23,12 +24,12 @@ function LoginForm() {
       const res = await signIn("credentials", {
         email: email.trim().toLowerCase(),
         password,
-        adminCode: adminCode.trim(),
+        adminCode: adminCode.trim() || undefined,
         redirect: false,
         callbackUrl,
       });
       if (res?.error) {
-        setError("Correo, contraseña o código de administrador incorrectos.");
+        setError("Correo o contraseña incorrectos. Si eres administrador, revisa también tu código.");
         setLoading(false);
         return;
       }
@@ -88,22 +89,33 @@ function LoginForm() {
               className="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-white text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
             />
           </div>
-          <div>
-            <label htmlFor="adminCode" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-              Código de administrador
-            </label>
-            <input
-              id="adminCode"
-              type="password"
-              autoComplete="off"
-              value={adminCode}
-              onChange={(e) => setAdminCode(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-white text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-              placeholder="Solo si entras como administrador"
-            />
-            <p className="mt-1 text-xs text-[var(--muted)]">
-              Los usuarios normales pueden dejar este campo en blanco.
-            </p>
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => setShowAdminCode((v) => !v)}
+              className="text-xs text-[var(--primary)] hover:underline"
+            >
+              {showAdminCode ? "Ocultar campo de código de administrador" : "¿Eres administrador? Mostrar campo de código"}
+            </button>
+            {showAdminCode && (
+              <div>
+                <label htmlFor="adminCode" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                  Código de administrador
+                </label>
+                <input
+                  id="adminCode"
+                  type="password"
+                  autoComplete="off"
+                  value={adminCode}
+                  onChange={(e) => setAdminCode(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-white text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                  placeholder="Solo si entras como administrador"
+                />
+                <p className="mt-1 text-xs text-[var(--muted)]">
+                  Si no eres administrador, no necesitas rellenar este campo.
+                </p>
+              </div>
+            )}
           </div>
           {error && (
             <p className="text-sm text-red-600 bg-red-50 py-2 px-3 rounded-lg">{error}</p>
