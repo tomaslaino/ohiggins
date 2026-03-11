@@ -9,6 +9,27 @@ type Category = { id: string; name: string; type?: string };
 type FruitType = { id: string; name: string };
 type VegetableType = { id: string; name: string };
 
+/** Placeholder para Descripción según categoría y tipo (ingreso/gasto). */
+function getDescriptionPlaceholder(categoryName: string | undefined, type: "ingreso" | "gasto"): string {
+  const n = (categoryName || "").toLowerCase().trim();
+  if (type === "ingreso") {
+    if (n.includes("sueldo")) return "Ej. Salario marzo, pago quincenal";
+    if (n.startsWith("fruta")) return "Ej. Venta fruta orgánica";
+    if (n.startsWith("verdura")) return "Ej. Venta tomates, cosecha";
+    if (n.includes("venta")) return "Ej. Venta en feria, cliente mayorista";
+    if (n === "otro" || n === "otros") return "Ej. Donación, subvención";
+    return "Ej. Descripción del ingreso";
+  }
+  // gasto
+  if (n.includes("sueldo")) return "Ej. Salario marzo, pago quincenal";
+  if (n.includes("transport")) return "Ej. Combustible, flete";
+  if (n.includes("riego") || n.includes("agua")) return "Ej. Reparación manguera, factura agua";
+  if (n.includes("herramient")) return "Ej. Guantes, tijeras, materiales";
+  if (n.includes("fertiliz") || n.includes("abono")) return "Ej. Compost, abono orgánico";
+  if (n === "otro" || n === "otros") return "Ej. Donación, subvención";
+  return "Ej. Descripción del gasto";
+}
+
 export default function NuevaEntradaPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
@@ -270,7 +291,7 @@ export default function NuevaEntradaPage() {
             value={form.description}
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
             className="w-full min-h-[48px] px-4 py-3 rounded-lg border border-[var(--border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)] touch-manipulation"
-            placeholder="Ej. Venta fruta orgánica"
+            placeholder={getDescriptionPlaceholder(categories.find((c) => c.id === form.categoryId)?.name, form.type)}
           />
         </div>
         <div>
