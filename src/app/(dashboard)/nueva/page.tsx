@@ -176,9 +176,10 @@ export default function NuevaEntradaPage() {
         </div>
         {(() => {
           const selectedCategory = categories.find((c) => c.id === form.categoryId);
-          const showFruitType = selectedCategory?.name === "Fruta";
-          const showVegetableType = selectedCategory?.name === "Verduras";
-          const showOtroDetalle = selectedCategory?.name === "Otro";
+          const normalizedName = (selectedCategory?.name || "").toLowerCase();
+          const showFruitType = normalizedName.startsWith("fruta"); // Fruta, Frutas…
+          const showVegetableType = normalizedName.startsWith("verdura"); // Verdura, Verduras…
+          const showOtroDetalle = normalizedName === "otro" || normalizedName === "otros";
           return (
             <>
               {showFruitType && (
